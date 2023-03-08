@@ -65,6 +65,7 @@ namespace QuestPDF.Drawing
             document.Compose(container);
             var content = container.Compose();
             ApplyDefaultTextStyle(content, TextStyle.LibraryDefault);
+            ApplyDefaultParagraphStyle(content, ParagraphStyle.LibraryDefault);
             ApplyContentDirection(content, ContentDirection.LeftToRight);
             
             var debuggingState = Settings.EnableDebugging ? ApplyDebugging(content) : null;
@@ -222,6 +223,40 @@ namespace QuestPDF.Drawing
 
             foreach (var child in content.GetChildren())
                 ApplyDefaultTextStyle(child, documentDefaultTextStyle);
+        }
+
+        internal static void ApplyDefaultParagraphStyle(this Element? content,
+            ParagraphStyle documentDefaultParagraphStyle)
+        {
+            if (content == null) return;
+
+            if (content is TextBlock textBlock)
+            {
+                textBlock.ParagraphStyle = textBlock.ParagraphStyle.ApplyGlobalStyle(documentDefaultParagraphStyle);
+                foreach (var textBlockItem in textBlock.Items)
+                {
+                    if (textBlockItem is TextBlockSpan textSpan)
+                        textSpan.ParagraphStyle =
+                            textSpan.ParagraphStyle.ApplyGlobalStyle(documentDefaultParagraphStyle);
+                    else if (textBlockItem is TextBlockElement textElement)
+                        ApplyDefaultParagraphStyle(textElement.Element, documentDefaultParagraphStyle);
+                }
+
+                return;
+            }
+
+            if (content is Column { Spacing: float.MinValue } column) 
+                column.Spacing = documentDefaultParagraphStyle.Spacing ?? 0;
+
+            if (content is DynamicHost dynamicHost)
+                dynamicHost.ParagraphStyle = dynamicHost.ParagraphStyle.ApplyGlobalStyle(documentDefaultParagraphStyle);
+
+            if (content is DefaultParagraphStyle defaultParagraphStyleElement)
+                documentDefaultParagraphStyle =
+                    defaultParagraphStyleElement.ParagraphStyle.ApplyGlobalStyle(documentDefaultParagraphStyle);
+            
+            foreach (var child in content.GetChildren())
+                ApplyDefaultParagraphStyle(child, documentDefaultParagraphStyle);
         }
     }
 }

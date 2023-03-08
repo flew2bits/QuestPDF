@@ -12,6 +12,7 @@ namespace QuestPDF.Elements
         private object InitialComponentState { get; set; }
 
         internal TextStyle TextStyle { get; set; } = TextStyle.Default;
+        internal ParagraphStyle ParagraphStyle { get; set; } = ParagraphStyle.Default;
         public ContentDirection ContentDirection { get; set; }
         
         public DynamicHost(DynamicComponentProxy child)

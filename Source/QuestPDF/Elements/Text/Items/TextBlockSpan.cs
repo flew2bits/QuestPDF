@@ -15,6 +15,7 @@ namespace QuestPDF.Elements.Text.Items
     {
         public string Text { get; set; }
         public TextStyle Style { get; set; } = TextStyle.Default;
+        public ParagraphStyle ParagraphStyle { get; set; } = ParagraphStyle.Default;
         private TextShapingResult? TextShapingResult { get; set; }
 
         private Dictionary<(int startIndex, float availableWidth), TextMeasurementResult?> MeasureCache = new ();

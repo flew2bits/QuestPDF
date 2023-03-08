@@ -88,7 +88,7 @@ namespace QuestPDF.Elements
         {
             var topOffset = 0f;
             var commands = new List<ColumnItemRenderingCommand>();
-
+            
             foreach (var item in Items)
             {
                 if (item.IsRendered)

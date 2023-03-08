@@ -10,7 +10,9 @@ namespace QuestPDF.Elements
     {
         public ContentDirection ContentDirection { get; set; }
         public TextStyle DefaultTextStyle { get; set; } = TextStyle.Default;
-        
+
+        public ParagraphStyle DefaultParagraphStyle { get; set; } = ParagraphStyle.Default;
+
         public Size MinSize { get; set; } = PageSizes.A4;
         public Size MaxSize { get; set; } = PageSizes.A4;
 
@@ -54,6 +56,7 @@ namespace QuestPDF.Elements
                         .PaddingBottom(MarginBottom)
                 
                         .DefaultTextStyle(DefaultTextStyle)
+                        .DefaultParagraphStyle(DefaultParagraphStyle)
                 
                         .Decoration(decoration =>
                         {

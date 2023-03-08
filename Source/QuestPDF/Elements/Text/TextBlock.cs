@@ -11,8 +11,8 @@ namespace QuestPDF.Elements.Text
     internal class TextBlock : Element, IStateResettable, IContentDirectionAware
     {
         public ContentDirection ContentDirection { get; set; }
-        
-        public HorizontalAlignment? Alignment { get; set; }
+
+        public ParagraphStyle ParagraphStyle { get; set; } = ParagraphStyle.Default;
         public List<ITextBlockItem> Items { get; set; } = new List<ITextBlockItem>();
 
         public string Text => string.Join(" ", Items.Where(x => x is TextBlockSpan).Cast<TextBlockSpan>().Select(x => x.Text));
@@ -55,12 +55,12 @@ namespace QuestPDF.Elements.Text
         
         void SetDefaultAlignment()
         {
-            if (Alignment.HasValue)
+            if (ParagraphStyle.TextAlignment != TextAlignment.Auto)
                 return;
 
-            Alignment = ContentDirection == ContentDirection.LeftToRight
-                ? HorizontalAlignment.Left
-                : HorizontalAlignment.Right;
+            ParagraphStyle.TextAlignment = ContentDirection == ContentDirection.LeftToRight
+                ? TextAlignment.Left
+                : TextAlignment.Right;
         }
 
         internal override SpacePlan Measure(Size availableSpace)
@@ -153,11 +153,11 @@ namespace QuestPDF.Elements.Text
             {
                 var emptySpace = availableSpace.Width - lineWidth;
 
-                return Alignment switch
+                return (ParagraphStyle?.TextAlignment ?? TextAlignment.Left) switch
                 {
-                    HorizontalAlignment.Left => ContentDirection == ContentDirection.LeftToRight ? 0 : emptySpace,
-                    HorizontalAlignment.Center => emptySpace / 2,
-                    HorizontalAlignment.Right => ContentDirection == ContentDirection.LeftToRight ? emptySpace : 0,
+                    TextAlignment.Left => ContentDirection == ContentDirection.LeftToRight ? 0 : emptySpace,
+                    TextAlignment.Center => emptySpace / 2,
+                    TextAlignment.Right => ContentDirection == ContentDirection.LeftToRight ? emptySpace : 0,
                     _ => 0
                 };
             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using QuestPDF.Drawing.Exceptions;
 using QuestPDF.Elements;
 using QuestPDF.Infrastructure;
@@ -177,13 +178,24 @@ namespace QuestPDF.Fluent
                 TextStyle = textStyle
             });
         }
-        
+
         public static IContainer DefaultTextStyle(this IContainer element, Func<TextStyle, TextStyle> handler)
         {
             return element.Element(new DefaultTextStyle
             {
                 TextStyle = handler(TextStyle.Default)
             });
+        }
+        
+        public static IContainer DefaultParagraphStyle(this IContainer element, ParagraphStyle paragraphStyle)
+        {
+            return element.Element(new DefaultParagraphStyle { ParagraphStyle = paragraphStyle });
+        }
+
+        public static IContainer DefaultParagraphStyle(this IContainer element,
+            Func<ParagraphStyle, ParagraphStyle> handler)
+        {
+            return element.Element(new DefaultParagraphStyle{ ParagraphStyle = handler(ParagraphStyle.Default)});
         }
         
         public static IContainer StopPaging(this IContainer element)

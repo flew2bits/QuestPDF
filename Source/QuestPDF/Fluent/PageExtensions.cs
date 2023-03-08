@@ -97,6 +97,16 @@ namespace QuestPDF.Fluent
         {
             DefaultTextStyle(handler(TextStyle.Default));
         }
+
+        public void DefaultParagraphStyle(ParagraphStyle paragraphStyle)
+        {
+            Page.DefaultParagraphStyle = paragraphStyle;
+        }
+
+        public void DefaultParagraphStyle(Func<ParagraphStyle, ParagraphStyle> handler)
+        {
+            DefaultParagraphStyle(handler(ParagraphStyle.Default));
+        }
         
         public void ContentFromLeftToRight()
         {

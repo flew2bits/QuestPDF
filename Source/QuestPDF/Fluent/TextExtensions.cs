@@ -50,8 +50,7 @@ namespace QuestPDF.Fluent
     {
         private ICollection<TextBlock> TextBlocks { get; } = new List<TextBlock>();
         private TextStyle? DefaultStyle { get; set; }
-        internal HorizontalAlignment? Alignment { get; set; }
-        private float Spacing { get; set; } = 0f;
+        internal ParagraphStyle? ParagraphStyle { get; set; }
 
         public void DefaultTextStyle(TextStyle style)
         {
@@ -62,25 +61,34 @@ namespace QuestPDF.Fluent
         {
             DefaultStyle = style(TextStyle.Default);
         }
-  
+
+        public void DefaultParagraphStyle(Func<ParagraphStyle, ParagraphStyle> paragraphStyle)
+        {
+            ParagraphStyle = paragraphStyle(ParagraphStyle.Default);
+        }
+        
         public void AlignLeft()
         {
-            Alignment = HorizontalAlignment.Left;
+            ParagraphStyle ??= new ParagraphStyle();
+            ParagraphStyle = ParagraphStyle.Mutate(ParagraphStyleProperty.TextAlignment, TextAlignment.Left);
         }
         
         public void AlignCenter()
         {
-            Alignment = HorizontalAlignment.Center;
+            ParagraphStyle ??= new ParagraphStyle();
+            ParagraphStyle = ParagraphStyle.Mutate(ParagraphStyleProperty.TextAlignment, TextAlignment.Center);
         }
         
         public void AlignRight()
         {
-            Alignment = HorizontalAlignment.Right;
+            ParagraphStyle ??= new ParagraphStyle();
+            ParagraphStyle = ParagraphStyle.Mutate(ParagraphStyleProperty.TextAlignment, TextAlignment.Right);
         }
 
         public void ParagraphSpacing(float value, Unit unit = Unit.Point)
         {
-            Spacing = value.ToPoints(unit);
+            ParagraphStyle ??= new ParagraphStyle();
+            ParagraphStyle = ParagraphStyle.Mutate(ParagraphStyleProperty.Spacing, value.ToPoints(unit));
         }
 
         private void AddItemToLastTextBlock(ITextBlockItem item)
@@ -242,7 +250,9 @@ namespace QuestPDF.Fluent
         
         internal void Compose(IContainer container)
         {
-            TextBlocks.ToList().ForEach(x => x.Alignment ??= Alignment);
+            var paragraphStyle = ParagraphStyle ?? ParagraphStyle.LibraryDefault;
+            
+            TextBlocks.ToList().ForEach(x => x.ParagraphStyle = x.ParagraphStyle.ApplyStyle(paragraphStyle, true));
             
             if (DefaultStyle != null)
                 container = container.DefaultTextStyle(DefaultStyle);
@@ -255,7 +265,7 @@ namespace QuestPDF.Fluent
             
             container.Column(column =>
             {
-                column.Spacing(Spacing);
+                column.Spacing(paragraphStyle.Spacing ?? float.MinValue);
 
                 foreach (var textBlock in TextBlocks)
                     column.Item().Element(textBlock);
@@ -268,10 +278,21 @@ namespace QuestPDF.Fluent
         public static void Text(this IContainer element, Action<TextDescriptor> content)
         {
             var descriptor = new TextDescriptor();
-            
+
             if (element is Alignment alignment)
-                descriptor.Alignment = alignment.Horizontal;
-            
+            {
+                descriptor.ParagraphStyle ??= ParagraphStyle.Default;
+                descriptor.ParagraphStyle = descriptor.ParagraphStyle.Mutate(ParagraphStyleProperty.TextAlignment,
+                    (alignment.Horizontal ?? HorizontalAlignment.Left)
+                        switch
+                        {
+                            HorizontalAlignment.Left => TextAlignment.Left,
+                            HorizontalAlignment.Center => TextAlignment.Center,
+                            HorizontalAlignment.Right => TextAlignment.Right,
+                            _ => TextAlignment.Left
+                        });
+            }
+
             content?.Invoke(descriptor);
             descriptor.Compose(element);
         }

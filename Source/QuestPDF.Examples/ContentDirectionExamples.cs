@@ -331,7 +331,7 @@ namespace QuestPDF.Examples
                     {
                         container.Text(text =>
                         {
-                            text.Alignment = alignment; // internal API
+                            //text.Alignment = alignment; // internal API
                     
                             text.Span("Lorem ipsum").Bold().FontColor(Colors.Red.Medium);
                             text.Element().Width(5);

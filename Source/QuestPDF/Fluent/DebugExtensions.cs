@@ -1,4 +1,8 @@
-﻿using QuestPDF.Elements;
+﻿using System;
+using QuestPDF.Drawing;
+using QuestPDF.Elements;
+using QuestPDF.Elements.Text;
+using QuestPDF.Elements.Text.Items;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
@@ -46,6 +50,77 @@ namespace QuestPDF.Fluent
                 Target = elementTraceText,
                 Highlight = highlight
             });
+        }
+
+        public static void GenerateDebug(this Document document)
+        {
+            var container = new DocumentContainer();
+            document.Compose(container);
+            var content = container.Compose();
+            
+            content.ApplyDefaultTextStyle(TextStyle.LibraryDefault);
+            content.ApplyDefaultParagraphStyle(ParagraphStyle.LibraryDefault);
+            content.ApplyContentDirection(ContentDirection.LeftToRight);
+            
+            DebugElement(content);
+        }
+
+        private static void DebugElement(Element? element, int level = 0)
+        {
+            if (element is null) return;
+
+            var levelIndent = new string(' ', level);
+            
+            switch (element)
+            {
+                case TextBlock textBlock:
+                {
+                    Console.WriteLine(levelIndent + "TextBlock");
+                    foreach (var textBlockItem in textBlock.Items)
+                        switch (textBlockItem)
+                        {
+                            case TextBlockSpan span: 
+                                Console.WriteLine(levelIndent + " " + $"TextSpan: TS:{span.Style.GetHashCode():X8} PS:{span.ParagraphStyle.GetHashCode():X8} {span.Text}");
+                                Console.WriteLine(levelIndent + "  - LI: " + span.ParagraphStyle.LeftIndent);
+                                Console.WriteLine(levelIndent + "  - FLLI: " + span.ParagraphStyle.FirstLineLeftIndent);
+                                Console.WriteLine(levelIndent + "  - RI: " + span.ParagraphStyle.RightIndent);
+                                Console.WriteLine(levelIndent + "  - SP: " + span.ParagraphStyle.Spacing);
+                                Console.WriteLine(levelIndent + "  - TA: " + span.ParagraphStyle.TextAlignment);
+                                Console.WriteLine(levelIndent + "  - DC: " + span.ParagraphStyle.DropCapLines);
+                                break;
+                            case TextBlockElement textElement:
+                                DebugElement(textElement.Element, level + 1);
+                                break;
+                        }
+
+                    return;
+                }
+                case Column column:
+                    Console.WriteLine(levelIndent + $"Column: SP - {column.Spacing}");
+                    break;
+                case DebugPointer debugPointer:
+                    Console.WriteLine(levelIndent + $"* {debugPointer.Target} *");
+                    break;
+                case Extend extend:
+                    Console.WriteLine(levelIndent + $"Extend: H - {extend.ExtendHorizontal}, V - {extend.ExtendVertical}");
+                    break;
+                case DefaultTextStyle textStyle:
+                    Console.WriteLine(levelIndent + $"TextStyle: {textStyle.TextStyle.GetHashCode():X8}");
+                    break;
+                case DefaultParagraphStyle paragraphStyle:
+                    Console.WriteLine(levelIndent + "ParagraphStyle");
+                    Console.WriteLine(levelIndent + " - LI: " + paragraphStyle.ParagraphStyle.LeftIndent);
+                    Console.WriteLine(levelIndent + " - FLLI: " + paragraphStyle.ParagraphStyle.FirstLineLeftIndent);
+                    Console.WriteLine(levelIndent + " - RI: " + paragraphStyle.ParagraphStyle.RightIndent);
+                    Console.WriteLine(levelIndent + " - SP: " + paragraphStyle.ParagraphStyle.Spacing);
+                    Console.WriteLine(levelIndent + " - TA: " + paragraphStyle.ParagraphStyle.TextAlignment);
+                    Console.WriteLine(levelIndent + " - DC: " + paragraphStyle.ParagraphStyle.DropCapLines);
+                    break;               
+                default:
+                    Console.WriteLine(levelIndent + element.GetType().Name);
+                    break;
+            }
+            foreach (var child in element.GetChildren()) DebugElement(child, level + 1);
         }
     }
 }
