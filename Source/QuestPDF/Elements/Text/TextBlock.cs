@@ -153,7 +153,7 @@ namespace QuestPDF.Elements.Text
             {
                 var emptySpace = availableSpace.Width - lineWidth;
 
-                return (ParagraphStyle?.TextAlignment ?? TextAlignment.Left) switch
+                return (ParagraphStyle.TextAlignment ?? TextAlignment.Left) switch
                 {
                     TextAlignment.Left => ContentDirection == ContentDirection.LeftToRight ? 0 : emptySpace,
                     TextAlignment.Center => emptySpace / 2,
