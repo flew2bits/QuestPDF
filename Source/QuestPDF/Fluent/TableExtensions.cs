@@ -23,6 +23,14 @@ namespace QuestPDF.Fluent
         {
             ComplexColumn(relativeWidth: width);
         }
+
+        public void AutoColumn()
+        {
+            if (Columns.Any(c => c.Auto))
+                throw new InvalidOperationException("Only one auto column definition is allowed");
+            var columnDefinition = new TableColumnDefinition();
+            Columns.Add(columnDefinition);
+        }
         
         private void ComplexColumn(float constantWidth = 0, float relativeWidth = 0)
         {

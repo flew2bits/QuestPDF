@@ -2,7 +2,8 @@ namespace QuestPDF.Elements.Table
 {
     internal class TableColumnDefinition
     {
-        public float ConstantSize { get; }
+        public bool Auto { get; }
+        public float ConstantSize { get; internal set; }
         public float RelativeSize { get; }
 
         internal float Width { get; set; }
@@ -11,6 +12,11 @@ namespace QuestPDF.Elements.Table
         {
             ConstantSize = constantSize;
             RelativeSize = relativeSize;
+        }
+
+        public TableColumnDefinition()
+        {
+            Auto = true;
         }
     }
 }

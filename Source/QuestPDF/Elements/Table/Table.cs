@@ -149,6 +149,17 @@ namespace QuestPDF.Elements.Table
         
         private void UpdateColumnsWidth(float availableWidth)
         {
+            var autoColumn = Columns.SingleOrDefault(c => c.Auto); // assume max one auto column
+            if (autoColumn is not null && Cells.Any())
+            {
+                var index = Columns.IndexOf(autoColumn);
+                var cells = Cells.Where(c => c.Column - 1 == index && c is { ColumnSpan: 1, RowSpan: 1 });
+                var maxWidth = cells.Select(c => c.Measure(Size.Max).Width).Max();
+
+                autoColumn.ConstantSize = maxWidth;
+            }
+            
+            
             var constantWidth = Columns.Sum(x => x.ConstantSize);
             var relativeWidth = Columns.Sum(x => x.RelativeSize);
 
